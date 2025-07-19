@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
 const mockStats = {
@@ -39,6 +39,7 @@ const RestaurantDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [restaurant, setRestaurant] = useState<any>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -84,14 +85,16 @@ const RestaurantDashboard: React.FC = () => {
         // Optionally handle error
         return;
       }
-      if (!data) {
+      // Only redirect if user just signed up and has no restaurant profile
+      if (!data && location.state && (location.state as any).fromSignup) {
         navigate("/restaurant/setup");
         return;
       }
       setRestaurant(data);
     };
     checkRestaurantProfile();
-  }, [navigate]);
+    // eslint-disable-next-line
+  }, [navigate, location.state]);
 
   return (
     <div

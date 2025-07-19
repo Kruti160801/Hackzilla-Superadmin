@@ -120,7 +120,7 @@ const Dashboard = () => {
     setIsLoading(false);
     closeSignupModal();
     setSignupData({ email: "", password: "", confirmPassword: "" });
-    navigate("/restaurant/dashboard");
+    navigate("/restaurant/dashboard", { state: { fromSignup: true } });
   };
 
   const handleSignupClick = () => {
