@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 const mockStats = {
   totalOrders: 128,
@@ -33,6 +35,28 @@ const valueStyle: React.CSSProperties = {
 };
 
 const RestaurantDashboard: React.FC = () => {
+  const [menu, setMenu] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("menu_items")
+          .select("*")
+          .order("id", { ascending: false });
+        if (error) throw error;
+        setMenu(data || []);
+      } catch (err) {
+        setMenu([]);
+      }
+      setLoading(false);
+    };
+    fetchMenu();
+  }, []);
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -48,6 +72,24 @@ const RestaurantDashboard: React.FC = () => {
       }}>
         Restaurant Dashboard
       </h2>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+        <button
+          style={{
+            background: "#e74c3c",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "12px 28px",
+            fontWeight: 600,
+            fontSize: 18,
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(231,76,60,0.15)",
+          }}
+          onClick={() => navigate("/restaurant/add-menu")}
+        >
+          + Add Menu
+        </button>
+      </div>
       <div style={{
         display: "flex",
         justifyContent: "center",
@@ -72,6 +114,61 @@ const RestaurantDashboard: React.FC = () => {
           <span style={labelStyle}>Menu Items</span>
           <span style={valueStyle}>{mockStats.menuItems}</span>
         </div>
+      </div>
+      <div style={{ maxWidth: 900, margin: "40px auto 0", background: "#fff", borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.08)", padding: 24 }}>
+        <h3 style={{ marginBottom: 16 }}>Menu Items</h3>
+        {loading ? (
+          <div>Loading menu...</div>
+        ) : menu.length === 0 ? (
+          <div>No menu items found.</div>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#f7f8fa" }}>
+                <th style={{ padding: 8, textAlign: "left" }}>Image</th>
+                <th style={{ padding: 8, textAlign: "left" }}>Name</th>
+                <th style={{ padding: 8, textAlign: "left" }}>Category ID</th>
+                <th style={{ padding: 8, textAlign: "left" }}>Restaurant ID</th>
+                <th style={{ padding: 8, textAlign: "left" }}>Price</th>
+                <th style={{ padding: 8, textAlign: "left" }}>Available</th>
+              </tr>
+            </thead>
+            <tbody>
+              {menu.map(item => (
+                <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
+                  <td style={{ padding: 8 }}>
+                    {item.image_url ? (
+                      (() => {
+                        let imgArr: string[] = [];
+                        if (Array.isArray(item.image_url)) {
+                          imgArr = item.image_url;
+                        } else if (typeof item.image_url === "string") {
+                          try {
+                            imgArr = JSON.parse(item.image_url);
+                          } catch {
+                            imgArr = [];
+                          }
+                        }
+                        return imgArr.length > 0 && imgArr[0] ? (
+                          <img src={imgArr[0]} alt={item.name} style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8 }} />
+                        ) : (
+                          <span style={{ color: "#ccc" }}>No Image</span>
+                        );
+                      })()
+                    ) : (
+                      <span style={{ color: "#ccc" }}>No Image</span>
+                    )}
+                  </td>
+                  <td style={{ padding: 8 }}>{item.name}</td>
+                  <td style={{ padding: 8 }}>{item.category_id}</td>
+                  <td style={{ padding: 8 }}>{item.restaurant_id}</td>
+                  <td style={{ padding: 8 }}>₹{item.price}</td>
+                  <td style={{ padding: 8 }}>{item.available ? "Yes" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
