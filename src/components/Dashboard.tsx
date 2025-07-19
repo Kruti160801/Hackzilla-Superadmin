@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import foodDeliveryBg from "../images/Food-delivery-bg.jpg";
-import { supabase } from "../supabaseClient"; // <-- import supabase client
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     remember: false,
-    // signup fields
-    name: "",
-    confirmPassword: "",
   });
 
-  const openModal = (type: "login" | "signup") => {
-    setMode(type);
+  const navigate = useNavigate();
+
+  const openModal = () => {
     setIsModalOpen(true);
     document.body.style.overflow = "hidden";
   };
@@ -25,7 +21,6 @@ const Dashboard = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     document.body.style.overflow = "auto";
-    setMode("login");
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,85 +32,30 @@ const Dashboard = () => {
   };
 
   const handleSubmit = async () => {
-    setErrorMsg(null);
-    if (mode === "login") {
-      if (!formData.email || !formData.password) {
-        setErrorMsg("Please fill in all required fields");
-        return;
-      }
-    } else {
-      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-        setErrorMsg("Please fill in all required fields");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        setErrorMsg("Passwords do not match");
-        return;
-      }
+    if (!formData.email || !formData.password) {
+      alert("Please fill in all required fields");
+      return;
     }
 
     setIsLoading(true);
 
-    try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (error) {
-          setErrorMsg(error.message);
-        } else {
-          alert(`Welcome back! Login successful for: ${formData.email}`);
-          closeModal();
-          setFormData({
-            email: "",
-            password: "",
-            remember: false,
-            name: "",
-            confirmPassword: "",
-          });
-        }
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: { name: formData.name }
-          }
-        });
-        if (error) {
-          setErrorMsg(error.message);
-        } else {
-          alert(`Sign up successful for: ${formData.email}. Please check your email to confirm your account.`);
-          closeModal();
-          setFormData({
-            email: "",
-            password: "",
-            remember: false,
-            name: "",
-            confirmPassword: "",
-          });
-        }
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred");
-    } finally {
+    // Simulate login process
+    setTimeout(() => {
+      alert(`Welcome back! Login successful for: ${formData.email}`);
       setIsLoading(false);
-    }
+      closeModal();
+      setFormData({ email: "", password: "", remember: false });
+      navigate("/restaurant/dashboard");
+    }, 2000);
   };
 
   const handleSignupClick = () => {
-    openModal("signup");
+    alert("Sign Up functionality would be implemented here!");
   };
 
   const handleSwitchToSignup = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    setMode("signup");
-  };
-
-  const handleSwitchToLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    setMode("login");
+    alert("This would switch to signup form!");
   };
 
   const handleForgotPassword = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -123,6 +63,7 @@ const Dashboard = () => {
     alert("Password reset functionality would be implemented here!");
   };
 
+  // Handle ESC key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
@@ -505,7 +446,7 @@ const Dashboard = () => {
           >
             Sign Up
           </button>
-          <button className="header-btn header-login-btn" onClick={() => openModal("login")}>
+          <button className="header-btn header-login-btn" onClick={openModal}>
             Login
           </button>
         </div>
@@ -535,7 +476,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Modal for Login/Signup */}
+      {/* Login Modal */}
       <div
         className="modal"
         onClick={(e) => {
@@ -551,174 +492,81 @@ const Dashboard = () => {
           <button className="close-btn" onClick={closeModal}>
             &times;
           </button>
-          {mode === "login" ? (
-            <>
-              <h2 className="modal-title">Welcome Back</h2>
-              <p className="modal-subtitle">Please sign in to your account</p>
-              <div>
-                {errorMsg && (
-                  <div style={{ color: "#e74c3c", marginBottom: 16, textAlign: "center" }}>
-                    {errorMsg}
-                  </div>
-                )}
-                <div className="form-group">
-                  <label className="form-label" htmlFor="email">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className="form-input"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="password">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    className="form-input"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-options">
-                  <div className="checkbox-container">
-                    <input
-                      type="checkbox"
-                      id="remember"
-                      name="remember"
-                      checked={formData.remember}
-                      onChange={handleInputChange}
-                    />
-                    <label htmlFor="remember">Remember me</label>
-                  </div>
-                  <a
-                    href="#"
-                    className="forgot-link"
-                    onClick={handleForgotPassword}
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
-                <button
-                  onClick={handleSubmit}
-                  className="modal-btn"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Signing In..." : "Sign In"}
-                </button>
-                <div className="switch-text">
-                  Don't have an account?{" "}
-                  <a
-                    href="#"
-                    className="switch-link"
-                    onClick={handleSwitchToSignup}
-                  >
-                    Sign up
-                  </a>
-                </div>
+          <h2 className="modal-title">Welcome Back</h2>
+          <p className="modal-subtitle">Please sign in to your account</p>
+
+          <div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="email">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="form-input"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="password">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className="form-input"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-options">
+              <div className="checkbox-container">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  name="remember"
+                  checked={formData.remember}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="remember">Remember me</label>
               </div>
-            </>
-          ) : (
-            <>
-              <h2 className="modal-title">Create Account</h2>
-              <p className="modal-subtitle">Sign up to get started</p>
-              <div>
-                {errorMsg && (
-                  <div style={{ color: "#e74c3c", marginBottom: 16, textAlign: "center" }}>
-                    {errorMsg}
-                  </div>
-                )}
-                <div className="form-group">
-                  <label className="form-label" htmlFor="name">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    className="form-input"
-                    placeholder="Enter your name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="email">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className="form-input"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="password">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    className="form-input"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="confirmPassword">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    className="form-input"
-                    placeholder="Confirm your password"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <button
-                  onClick={handleSubmit}
-                  className="modal-btn"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Signing Up..." : "Sign Up"}
-                </button>
-                <div className="switch-text">
-                  Already have an account?{" "}
-                  <a
-                    href="#"
-                    className="switch-link"
-                    onClick={handleSwitchToLogin}
-                  >
-                    Sign in
-                  </a>
-                </div>
-              </div>
-            </>
-          )}
+              <a
+                href="#"
+                className="forgot-link"
+                onClick={handleForgotPassword}
+              >
+                Forgot Password?
+              </a>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="modal-btn"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing In..." : "Sign In"}
+            </button>
+
+            <div className="switch-text">
+              Don't have an account?{" "}
+              <a
+                href="#"
+                className="switch-link"
+                onClick={handleSwitchToSignup}
+              >
+                Sign up
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
