@@ -61,23 +61,15 @@ const RestaurantDashboard: React.FC = () => {
   useEffect(() => {
     // Check if restaurant profile exists for current user
     const checkRestaurantProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
-      // Fetch numeric user id from users table using email
-      const { data: userRow, error: userFetchError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("email", user.email)
-        .maybeSingle();
-      if (userFetchError || !userRow) {
-        // Optionally handle error
-        return;
-      }
       // Use maybeSingle to avoid error if no row is found
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("owner_id", userRow.id)
+        .eq("owner_id", user.id)
         .maybeSingle();
       if (error) {
         // Optionally handle error
@@ -93,21 +85,27 @@ const RestaurantDashboard: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#f7f8fa",
-      padding: "40px 0",
-    }}>
-      <h2 style={{
-        textAlign: "center",
-        fontSize: 32,
-        fontWeight: 700,
-        marginBottom: 32,
-        color: "#333",
-      }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f7f8fa",
+        padding: "40px 0",
+      }}
+    >
+      <h2
+        style={{
+          textAlign: "center",
+          fontSize: 32,
+          fontWeight: 700,
+          marginBottom: 32,
+          color: "#333",
+        }}
+      >
         Restaurant Dashboard
       </h2>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}
+      >
         <button
           style={{
             background: "#3498db",
@@ -126,7 +124,9 @@ const RestaurantDashboard: React.FC = () => {
           Edit Restaurant Profile
         </button>
       </div>
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}
+      >
         <button
           style={{
             background: "#e74c3c",
@@ -144,32 +144,47 @@ const RestaurantDashboard: React.FC = () => {
           + Add Menu
         </button>
       </div>
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        flexWrap: "wrap",
-        gap: 24,
-        maxWidth: 900,
-        margin: "0 auto",
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: 24,
+          maxWidth: 900,
+          margin: "0 auto",
+        }}
+      >
         <div style={cardStyle}>
           <span style={labelStyle}>Total Orders</span>
           <span style={valueStyle}>{mockStats.totalOrders}</span>
         </div>
         <div style={cardStyle}>
           <span style={labelStyle}>Total Sales</span>
-          <span style={valueStyle}>₹{mockStats.totalSales.toLocaleString()}</span>
+          <span style={valueStyle}>
+            ₹{mockStats.totalSales.toLocaleString()}
+          </span>
         </div>
         <div style={cardStyle}>
           <span style={labelStyle}>Net Profit</span>
-          <span style={valueStyle}>₹{mockStats.netProfit.toLocaleString()}</span>
+          <span style={valueStyle}>
+            ₹{mockStats.netProfit.toLocaleString()}
+          </span>
         </div>
         <div style={cardStyle}>
           <span style={labelStyle}>Menu Items</span>
           <span style={valueStyle}>{mockStats.menuItems}</span>
         </div>
       </div>
-      <div style={{ maxWidth: 900, margin: "40px auto 0", background: "#fff", borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.08)", padding: 24 }}>
+      <div
+        style={{
+          maxWidth: 900,
+          margin: "40px auto 0",
+          background: "#fff",
+          borderRadius: 16,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+          padding: 24,
+        }}
+      >
         <h3 style={{ marginBottom: 16 }}>Menu Items</h3>
         {loading ? (
           <div>Loading menu...</div>
@@ -188,7 +203,7 @@ const RestaurantDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {menu.map(item => (
+              {menu.map((item) => (
                 <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
                   <td style={{ padding: 8 }}>
                     {item.image_url ? (
@@ -204,7 +219,16 @@ const RestaurantDashboard: React.FC = () => {
                           }
                         }
                         return imgArr.length > 0 && imgArr[0] ? (
-                          <img src={imgArr[0]} alt={item.name} style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8 }} />
+                          <img
+                            src={imgArr[0]}
+                            alt={item.name}
+                            style={{
+                              width: 48,
+                              height: 48,
+                              objectFit: "cover",
+                              borderRadius: 8,
+                            }}
+                          />
                         ) : (
                           <span style={{ color: "#ccc" }}>No Image</span>
                         );
@@ -217,7 +241,9 @@ const RestaurantDashboard: React.FC = () => {
                   <td style={{ padding: 8 }}>{item.category_id}</td>
                   <td style={{ padding: 8 }}>{item.restaurant_id}</td>
                   <td style={{ padding: 8 }}>₹{item.price}</td>
-                  <td style={{ padding: 8 }}>{item.available ? "Yes" : "No"}</td>
+                  <td style={{ padding: 8 }}>
+                    {item.available ? "Yes" : "No"}
+                  </td>
                 </tr>
               ))}
             </tbody>

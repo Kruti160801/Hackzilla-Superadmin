@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
@@ -16,31 +16,6 @@ const AddMenu: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  // Fetch and set restaurantId automatically for the logged-in user
-  useEffect(() => {
-    const fetchRestaurantId = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      // Fetch numeric user id from users table using email
-      const { data: userRow } = await supabase
-        .from("users")
-        .select("id")
-        .eq("email", user.email)
-        .maybeSingle();
-      if (!userRow) return;
-      // Fetch restaurant for this user
-      const { data: restaurant } = await supabase
-        .from("restaurants")
-        .select("id")
-        .eq("owner_id", userRow.id)
-        .maybeSingle();
-      if (restaurant && restaurant.id) {
-        setRestaurantId(String(restaurant.id));
-      }
-    };
-    fetchRestaurantId();
-  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -61,7 +36,7 @@ const AddMenu: React.FC = () => {
 
     let imageUrl = null;
     if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
+      const fileExt = imageFile.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from("item-images-1")
@@ -72,7 +47,8 @@ const AddMenu: React.FC = () => {
         setLoading(false);
         return;
       }
-      imageUrl = supabase.storage.from("item-images-1").getPublicUrl(fileName).data.publicUrl;
+      imageUrl = supabase.storage.from("item-images-1").getPublicUrl(fileName)
+        .data.publicUrl;
     }
 
     const menuInsert = {
@@ -100,44 +76,143 @@ const AddMenu: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "40px auto", background: "#fff", borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.08)", padding: 32 }}>
+    <div
+      style={{
+        maxWidth: 400,
+        margin: "40px auto",
+        background: "#fff",
+        borderRadius: 16,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+        padding: 32,
+      }}
+    >
       <h2 style={{ textAlign: "center", marginBottom: 24 }}>Add New Dish</h2>
-      {error && <div style={{ color: "#e74c3c", marginBottom: 16 }}>{error}</div>}
+      {error && (
+        <div style={{ color: "#e74c3c", marginBottom: 16 }}>{error}</div>
+      )}
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 16 }}>
           <label>Dish Image</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "block", marginTop: 8 }} />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: "block", marginTop: 8 }}
+          />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Dish Name *</label>
-          <input type="text" value={dishName} onChange={e => setDishName(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
+          <input
+            type="text"
+            value={dishName}
+            onChange={(e) => setDishName(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: 8,
+              borderRadius: 6,
+              border: "1px solid #ccc",
+            }}
+          />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Description</label>
-          <textarea value={description} onChange={e => setDescription(e.target.value)} maxLength={200} style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={200}
+            style={{
+              width: "100%",
+              padding: 8,
+              borderRadius: 6,
+              border: "1px solid #ccc",
+            }}
+          />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Price *</label>
-          <input type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: 8,
+              borderRadius: 6,
+              border: "1px solid #ccc",
+            }}
+          />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Category ID *</label>
-          <input type="text" value={categoryId} onChange={e => setCategoryId(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
+          <input
+            type="text"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: 8,
+              borderRadius: 6,
+              border: "1px solid #ccc",
+            }}
+          />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Restaurant ID *</label>
-          <input type="text" value={restaurantId} disabled style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc", background: "#f5f5f5" }} />
+          <input
+            type="text"
+            value={restaurantId}
+            style={{
+              width: "100%",
+              padding: 8,
+              borderRadius: 6,
+              border: "1px solid #ccc",
+              background: "#f5f5f5",
+            }}
+          />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>
-            <input type="checkbox" checked={available} onChange={e => setAvailable(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={available}
+              onChange={(e) => setAvailable(e.target.checked)}
+            />
             Available
           </label>
         </div>
-        <button type="submit" disabled={loading} style={{ width: "100%", padding: 12, borderRadius: 8, background: "#e74c3c", color: "#fff", fontWeight: 600, border: "none" }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: 12,
+            borderRadius: 8,
+            background: "#e74c3c",
+            color: "#fff",
+            fontWeight: 600,
+            border: "none",
+          }}
+        >
           {loading ? "Saving..." : "Add Dish"}
         </button>
-        <button type="button" onClick={() => navigate("/restaurant/dashboard")} style={{ width: "100%", marginTop: 12, padding: 12, borderRadius: 8, background: "#eee", color: "#333", border: "none" }}>
+        <button
+          type="button"
+          onClick={() => navigate("/restaurant/dashboard")}
+          style={{
+            width: "100%",
+            marginTop: 12,
+            padding: 12,
+            borderRadius: 8,
+            background: "#eee",
+            color: "#333",
+            border: "none",
+          }}
+        >
           Cancel
         </button>
       </form>
