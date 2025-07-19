@@ -59,11 +59,22 @@ const RestaurantSetup: React.FC = () => {
         navigate("/");
         return;
       }
+      // Fetch numeric user id from users table using email
+      const { data: userRow, error: userFetchError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", user.email)
+        .maybeSingle();
+      if (userFetchError || !userRow) {
+        setError("Could not fetch user profile from database.");
+        setLoading(false);
+        return;
+      }
       // Use maybeSingle to avoid error if no row is found
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("owner_id", user.id)
+        .eq("owner_id", userRow.id)
         .maybeSingle();
       if (error) {
         setError("Error fetching restaurant profile.");
