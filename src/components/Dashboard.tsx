@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import foodDeliveryBg from "../images/Food-delivery-bg.jpg";
+import { supabase } from "../supabaseClient"; // <-- import supabase client
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -35,40 +37,71 @@ const Dashboard = () => {
   };
 
   const handleSubmit = async () => {
+    setErrorMsg(null);
     if (mode === "login") {
       if (!formData.email || !formData.password) {
-        alert("Please fill in all required fields");
+        setErrorMsg("Please fill in all required fields");
         return;
       }
     } else {
       if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-        alert("Please fill in all required fields");
+        setErrorMsg("Please fill in all required fields");
         return;
       }
       if (formData.password !== formData.confirmPassword) {
-        alert("Passwords do not match");
+        setErrorMsg("Passwords do not match");
         return;
       }
     }
 
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
       if (mode === "login") {
-        alert(`Welcome back! Login successful for: ${formData.email}`);
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        if (error) {
+          setErrorMsg(error.message);
+        } else {
+          alert(`Welcome back! Login successful for: ${formData.email}`);
+          closeModal();
+          setFormData({
+            email: "",
+            password: "",
+            remember: false,
+            name: "",
+            confirmPassword: "",
+          });
+        }
       } else {
-        alert(`Sign up successful for: ${formData.email}`);
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: { name: formData.name }
+          }
+        });
+        if (error) {
+          setErrorMsg(error.message);
+        } else {
+          alert(`Sign up successful for: ${formData.email}. Please check your email to confirm your account.`);
+          closeModal();
+          setFormData({
+            email: "",
+            password: "",
+            remember: false,
+            name: "",
+            confirmPassword: "",
+          });
+        }
       }
+    } catch (err: any) {
+      setErrorMsg(err.message || "An error occurred");
+    } finally {
       setIsLoading(false);
-      closeModal();
-      setFormData({
-        email: "",
-        password: "",
-        remember: false,
-        name: "",
-        confirmPassword: "",
-      });
-    }, 2000);
+    }
   };
 
   const handleSignupClick = () => {
@@ -523,6 +556,11 @@ const Dashboard = () => {
               <h2 className="modal-title">Welcome Back</h2>
               <p className="modal-subtitle">Please sign in to your account</p>
               <div>
+                {errorMsg && (
+                  <div style={{ color: "#e74c3c", marginBottom: 16, textAlign: "center" }}>
+                    {errorMsg}
+                  </div>
+                )}
                 <div className="form-group">
                   <label className="form-label" htmlFor="email">
                     Email Address
@@ -596,6 +634,11 @@ const Dashboard = () => {
               <h2 className="modal-title">Create Account</h2>
               <p className="modal-subtitle">Sign up to get started</p>
               <div>
+                {errorMsg && (
+                  <div style={{ color: "#e74c3c", marginBottom: 16, textAlign: "center" }}>
+                    {errorMsg}
+                  </div>
+                )}
                 <div className="form-group">
                   <label className="form-label" htmlFor="name">
                     Name
