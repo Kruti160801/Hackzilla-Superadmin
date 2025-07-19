@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
@@ -16,6 +16,33 @@ const AddMenu: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  // Fetch and set restaurantId automatically for the logged-in user
+  useEffect(() => {
+    const fetchRestaurantId = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      // Fetch numeric user id from users table using email
+      const { data: userRow } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", user.email)
+        .maybeSingle();
+      if (!userRow) return;
+      // Fetch restaurant for this user
+      const { data: restaurant } = await supabase
+        .from("restaurants")
+        .select("id")
+        .eq("owner_id", userRow.id)
+        .maybeSingle();
+      if (restaurant && restaurant.id) {
+        setRestaurantId(String(restaurant.id));
+      }
+    };
+    fetchRestaurantId();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

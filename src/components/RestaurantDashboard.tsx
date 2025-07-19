@@ -65,11 +65,20 @@ const RestaurantDashboard: React.FC = () => {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
+      const { data: userRow, error: userFetchError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", user.email)
+        .maybeSingle();
+      if (userFetchError || !userRow) {
+        // Optionally handle error
+        return;
+      }
       // Use maybeSingle to avoid error if no row is found
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
-        .eq("owner_id", user.id)
+        .eq("owner_id", userRow.id)
         .maybeSingle();
       if (error) {
         // Optionally handle error
