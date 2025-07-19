@@ -1,18 +1,14 @@
-import React, { type ReactNode } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import logo from './logo.svg';
-import './App.css';
-import SignIn from './SignIn';
-import Login from './Login';
-import { AuthProvider, useAuth } from './AuthProvider';
-import Dashboard from './Dashboard';
+import React, { type ReactNode } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import logo from "./logo.svg";
+import "./App.css";
+import SignIn from "./components/Auth/SignIn";
+import Login from "./components/Auth/Login";
+import { AuthProvider, useAuth } from "./AuthProvider";
+import Dashboard from "./components/Dashboard";
 
 function Home() {
   return <Dashboard />;
-}
-
-function About() {
-  return <div className="App"><h2>About Page</h2></div>;
 }
 
 const RequireAuth: React.FC<{ children: ReactNode }> = ({ children }) => {
