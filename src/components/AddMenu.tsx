@@ -131,14 +131,14 @@ const AddMenu: React.FC = () => {
           <label>Dish Name *</label>
           <input
             type="text"
-            value={dishName}
-            onChange={(e) => setDishName(e.target.value)}
-            required
+            value={restaurantId}
+            disabled
             style={{
               width: "100%",
               padding: 8,
               borderRadius: 6,
               border: "1px solid #ccc",
+              background: "#f5f5f5",
             }}
           />
         </div>
@@ -193,6 +193,7 @@ const AddMenu: React.FC = () => {
           <input
             type="text"
             value={restaurantId}
+            disabled
             style={{
               width: "100%",
               padding: 8,
