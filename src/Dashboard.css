@@ -1,0 +1,129 @@
+:root {
+  --primary-blue: #4f46e5;
+}
+
+.dashboard-main {
+  max-width: 900px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+  padding: 2rem 2.5rem;
+}
+
+.dashboard-form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-form-row input {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+}
+
+.dashboard-textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid #c7d2fe;
+  border-radius: 0.6rem;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  resize: vertical;
+}
+
+.dashboard-btn-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.dashboard-btn-primary {
+  background: var(--primary-blue);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-btn-secondary {
+  background: #f1f5f9;
+  color: #374151;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-btn-danger {
+  background: none;
+  color: #ef4444;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-list-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.dashboard-list-header h2 {
+  flex: 1;
+  margin: 0;
+}
+
+.dashboard-search {
+  padding: 0.6rem 1rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+}
+
+.dashboard-select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.dashboard-table th, .dashboard-table td {
+  padding: 0.8rem 0.5rem;
+  text-align: left;
+}
+
+.dashboard-table th {
+  color: #64748b;
+  font-size: 0.98rem;
+  font-weight: 700;
+  background: #eef2ff;
+}
+
+.dashboard-table tr:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
