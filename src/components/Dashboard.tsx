@@ -1,25 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import foodDeliveryBg from "../images/Food-delivery-bg.jpg";
+import { supabase } from "../supabaseClient"; // import supabase client
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     remember: false,
   });
+  const [signupData, setSignupData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [signupError, setSignupError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   const openModal = () => {
     setIsModalOpen(true);
+    setError(null);
     document.body.style.overflow = "hidden";
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setError(null);
+    document.body.style.overflow = "auto";
+  };
+
+  const openSignupModal = () => {
+    setIsSignupModalOpen(true);
+    setSignupError(null);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeSignupModal = () => {
+    setIsSignupModalOpen(false);
+    setSignupError(null);
     document.body.style.overflow = "auto";
   };
 
@@ -31,31 +54,74 @@ const Dashboard = () => {
     }));
   };
 
+  const handleSignupInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignupData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async () => {
+    setError(null);
     if (!formData.email || !formData.password) {
-      alert("Please fill in all required fields");
+      setError("Please fill in all required fields");
       return;
     }
-
     setIsLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formData.email,
+      password: formData.password,
+    });
+    setIsLoading(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    closeModal();
+    setFormData({ email: "", password: "", remember: false });
+    navigate("/restaurant/dashboard");
+  };
 
-    // Simulate login process
-    setTimeout(() => {
-      alert(`Welcome back! Login successful for: ${formData.email}`);
-      setIsLoading(false);
-      closeModal();
-      setFormData({ email: "", password: "", remember: false });
-      navigate("/restaurant/dashboard");
-    }, 2000);
+  const handleSignup = async () => {
+    setSignupError(null);
+    if (!signupData.email || !signupData.password || !signupData.confirmPassword) {
+      setSignupError("Please fill in all required fields");
+      return;
+    }
+    if (signupData.password !== signupData.confirmPassword) {
+      setSignupError("Passwords do not match");
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email: signupData.email,
+      password: signupData.password,
+    });
+    setIsLoading(false);
+    if (error) {
+      setSignupError(error.message);
+      return;
+    }
+    closeSignupModal();
+    setSignupData({ email: "", password: "", confirmPassword: "" });
+    navigate("/restaurant/dashboard");
   };
 
   const handleSignupClick = () => {
-    alert("Sign Up functionality would be implemented here!");
+    openSignupModal();
   };
 
   const handleSwitchToSignup = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    alert("This would switch to signup form!");
+    closeModal();
+    openSignupModal();
+  };
+
+  const handleSwitchToLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    closeSignupModal();
+    openModal();
   };
 
   const handleForgotPassword = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -66,13 +132,14 @@ const Dashboard = () => {
   // Handle ESC key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isModalOpen) {
-        closeModal();
+      if (e.key === "Escape") {
+        if (isModalOpen) closeModal();
+        if (isSignupModalOpen) closeSignupModal();
       }
     };
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
-  }, [isModalOpen]);
+  }, [isModalOpen, isSignupModalOpen]);
 
   return (
     <div style={{ margin: 0, padding: 0, boxSizing: "border-box" }}>
@@ -402,6 +469,13 @@ const Dashboard = () => {
           text-decoration: underline;
         }
 
+        .error-message {
+          color: #e74c3c;
+          text-align: center;
+          margin-bottom: 16px;
+          font-size: 0.98rem;
+        }
+
         @media (max-width: 768px) {
           .header {
             padding: 15px 20px;
@@ -479,6 +553,7 @@ const Dashboard = () => {
       {/* Login Modal */}
       <div
         className="modal"
+        style={{ display: isModalOpen ? "flex" : "none" }}
         onClick={(e) => {
           if (
             e.target instanceof HTMLElement &&
@@ -494,7 +569,7 @@ const Dashboard = () => {
           </button>
           <h2 className="modal-title">Welcome Back</h2>
           <p className="modal-subtitle">Please sign in to your account</p>
-
+          {error && <div className="error-message">{error}</div>}
           <div>
             <div className="form-group">
               <label className="form-label" htmlFor="email">
@@ -564,6 +639,97 @@ const Dashboard = () => {
                 onClick={handleSwitchToSignup}
               >
                 Sign up
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Signup Modal */}
+      <div
+        className="modal"
+        style={{ display: isSignupModalOpen ? "flex" : "none" }}
+        onClick={(e) => {
+          if (
+            e.target instanceof HTMLElement &&
+            e.target.classList.contains("modal")
+          ) {
+            closeSignupModal();
+          }
+        }}
+      >
+        <div className="modal-content">
+          <button className="close-btn" onClick={closeSignupModal}>
+            &times;
+          </button>
+          <h2 className="modal-title">Create Account</h2>
+          <p className="modal-subtitle">Sign up to get started</p>
+          {signupError && <div className="error-message">{signupError}</div>}
+          <div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="signup-email">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="signup-email"
+                name="email"
+                className="form-input"
+                placeholder="Enter your email"
+                value={signupData.email}
+                onChange={handleSignupInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="signup-password">
+                Password
+              </label>
+              <input
+                type="password"
+                id="signup-password"
+                name="password"
+                className="form-input"
+                placeholder="Enter your password"
+                value={signupData.password}
+                onChange={handleSignupInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="signup-confirm-password">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="signup-confirm-password"
+                name="confirmPassword"
+                className="form-input"
+                placeholder="Confirm your password"
+                value={signupData.confirmPassword}
+                onChange={handleSignupInputChange}
+                required
+              />
+            </div>
+
+            <button
+              onClick={handleSignup}
+              className="modal-btn"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing Up..." : "Sign Up"}
+            </button>
+
+            <div className="switch-text">
+              Already have an account?{" "}
+              <a
+                href="#"
+                className="switch-link"
+                onClick={handleSwitchToLogin}
+              >
+                Sign in
               </a>
             </div>
           </div>
