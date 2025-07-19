@@ -37,6 +37,7 @@ const valueStyle: React.CSSProperties = {
 const RestaurantDashboard: React.FC = () => {
   const [menu, setMenu] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [restaurant, setRestaurant] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,6 +58,30 @@ const RestaurantDashboard: React.FC = () => {
     fetchMenu();
   }, []);
 
+  useEffect(() => {
+    // Check if restaurant profile exists for current user
+    const checkRestaurantProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      // Use maybeSingle to avoid error if no row is found
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("*")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+      if (error) {
+        // Optionally handle error
+        return;
+      }
+      if (!data) {
+        navigate("/restaurant/setup");
+        return;
+      }
+      setRestaurant(data);
+    };
+    checkRestaurantProfile();
+  }, [navigate]);
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -72,6 +97,25 @@ const RestaurantDashboard: React.FC = () => {
       }}>
         Restaurant Dashboard
       </h2>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+        <button
+          style={{
+            background: "#3498db",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "12px 28px",
+            fontWeight: 600,
+            fontSize: 18,
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(52,152,219,0.15)",
+            marginRight: 16,
+          }}
+          onClick={() => navigate("/restaurant/setup")}
+        >
+          Edit Restaurant Profile
+        </button>
+      </div>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
         <button
           style={{

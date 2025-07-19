@@ -94,15 +94,30 @@ const Dashboard = () => {
       return;
     }
     setIsLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: signupData.email,
       password: signupData.password,
     });
-    setIsLoading(false);
     if (error) {
+      setIsLoading(false);
       setSignupError(error.message);
       return;
     }
+
+    // Insert user profile into users table
+    if (data.user) {
+      // You can add more fields as needed
+      const { error: insertError } = await supabase
+        .from("users")
+        .insert([{ email: data.user.email }]);
+      if (insertError) {
+        setIsLoading(false);
+        setSignupError("Signup succeeded, but failed to create user profile.");
+        return;
+      }
+    }
+
+    setIsLoading(false);
     closeSignupModal();
     setSignupData({ email: "", password: "", confirmPassword: "" });
     navigate("/restaurant/dashboard");

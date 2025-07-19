@@ -8,8 +8,8 @@ const AddMenu: React.FC = () => {
   const [dishName, setDishName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [categoryId, setCategoryId] = useState(""); // category_id as string
-  const [restaurantId, setRestaurantId] = useState(""); // restaurant_id as string
+  const [categoryId, setCategoryId] = useState(""); // keep as string
+  const [restaurantId, setRestaurantId] = useState(""); // keep as string
   const [available, setAvailable] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +56,8 @@ const AddMenu: React.FC = () => {
       price: parseFloat(price),
       available,
       image_url: imageUrl ? JSON.stringify([imageUrl]) : null,
-      category_id: categoryId ? parseInt(categoryId) : null,
-      restaurant_id: restaurantId ? parseInt(restaurantId) : null,
+      category_id: categoryId || null, // do not parseInt if it's a uuid
+      restaurant_id: restaurantId || null, // do not parseInt if it's a uuid
     };
 
     const { error: insertError } = await supabase
@@ -97,11 +97,11 @@ const AddMenu: React.FC = () => {
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Category ID *</label>
-          <input type="number" value={categoryId} onChange={e => setCategoryId(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
+          <input type="text" value={categoryId} onChange={e => setCategoryId(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Restaurant ID *</label>
-          <input type="number" value={restaurantId} onChange={e => setRestaurantId(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
+          <input type="text" value={restaurantId} onChange={e => setRestaurantId(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }} />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>
